@@ -40,8 +40,12 @@ final class SeoMetaManager implements AfterMatchEvent
 	private $match;
 
 
-	public function __construct(Localization $localization, IStorage $storage, SmartRouter $smartRouter, LinkGenerator $linkGenerator)
-	{
+	public function __construct(
+		Localization $localization,
+		IStorage $storage,
+		SmartRouter $smartRouter,
+		LinkGenerator $linkGenerator
+	) {
 		$this->localization = $localization;
 		$this->cache = new Cache($storage, 'baraja-seo-meta-manager');
 		$this->smartRouter = $smartRouter;
@@ -131,7 +135,10 @@ final class SeoMetaManager implements AfterMatchEvent
 			}
 		}
 
-		if ($this->ogImageResolver !== null && ($ogImageUrl = $this->ogImageResolver->getUrl($alternateRoute, $alternateParams)) !== null) {
+		if (
+			$this->ogImageResolver !== null
+			&& ($ogImageUrl = $this->ogImageResolver->getUrl($alternateRoute, $alternateParams)) !== null
+		) {
 			$tags[] = '<meta property="og:image" content="' . Helpers::escapeHtmlAttr($ogImageUrl) . '">';
 		}
 
@@ -162,7 +169,13 @@ final class SeoMetaManager implements AfterMatchEvent
 		if (($title = $meta->getMetaTitle()) !== null) {
 			return Helpers::formatTitle($format, $title, $separator, $suffix);
 		}
-		if (($this->match['presenter'] === 'Homepage' || $this->match['presenter'] === 'Front:Homepage') && $this->match['action'] === 'default') {
+		if (
+			(
+				$this->match['presenter'] === 'Homepage'
+				|| $this->match['presenter'] === 'Front:Homepage'
+			)
+			&& $this->match['action'] === 'default'
+		) {
 			return $this->localization->getStatus()->getLocaleToSiteName()[$locale] ?? null;
 		}
 

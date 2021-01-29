@@ -36,7 +36,8 @@ final class SeoMetaExtension extends CompilerExtension
 			'// seo meta.' . "\n"
 			. '(function () {' . "\n"
 			. "\t" . '$this->getService(?)->addAfterMatchEvent($this->getService(?));' . "\n"
-			. '})();', [
+			. '})();',
+			[
 				$smartRouter->getName(),
 				$seoMetaManager->getName(),
 			]

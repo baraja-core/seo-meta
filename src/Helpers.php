@@ -7,11 +7,10 @@ namespace Baraja\SeoMeta;
 
 final class Helpers
 {
-
 	/** @throws \Error */
 	public function __construct()
 	{
-		throw new \Error('Class ' . get_class($this) . ' is static and cannot be instantiated.');
+		throw new \Error('Class ' . static::class . ' is static and cannot be instantiated.');
 	}
 
 
@@ -40,8 +39,12 @@ final class Helpers
 	/**
 	 * Format meta title by mask. If suffix is empty, remove with separator.
 	 */
-	public static function formatTitle(string $format, string $title, ?string $separator = null, ?string $suffix = null): string
-	{
+	public static function formatTitle(
+		string $format,
+		string $title,
+		?string $separator = null,
+		?string $suffix = null
+	): string {
 		$separator = trim($separator ?? '|');
 		$return = trim(str_replace(['{{ title }}', '{{ separator }}', '{{ suffix }}'], [$title, $separator, $suffix ?? ''], $format));
 		$return = (string) preg_replace('/\s+/', ' ', trim(trim($return, $separator)));
