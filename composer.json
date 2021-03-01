@@ -8,8 +8,8 @@
 		}
 	],
 	"require": {
-		"php": ">=7.1.0",
-		"baraja-core/smart-router": "^1.0"
+		"php": "^8.0",
+		"baraja-core/smart-router": "^2.0"
 	},
 	"require-dev": {
 		"tracy/tracy": "^2.8",
