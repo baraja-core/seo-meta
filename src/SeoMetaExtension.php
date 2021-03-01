@@ -40,7 +40,7 @@ final class SeoMetaExtension extends CompilerExtension
 			[
 				$smartRouter->getName(),
 				$seoMetaManager->getName(),
-			]
+			],
 		);
 	}
 }
