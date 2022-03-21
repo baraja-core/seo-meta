@@ -28,7 +28,7 @@ final class Helpers
 	 */
 	public static function escapeHtmlAttr(string $s, bool $double = true): string
 	{
-		if (strpos($s, '`') !== false && strpbrk($s, ' <>"\'') === false) {
+		if (str_contains($s, '`')   && strpbrk($s, ' <>"\'') === false) {
 			$s .= ' '; // protection against innerHTML mXSS vulnerability nette/nette#1496
 		}
 
@@ -43,7 +43,7 @@ final class Helpers
 		string $format,
 		string $title,
 		?string $separator = null,
-		?string $suffix = null
+		?string $suffix = null,
 	): string {
 		$separator = trim($separator ?? '|');
 		$return = trim(str_replace(['{{ title }}', '{{ separator }}', '{{ suffix }}'], [$title, $separator, $suffix ?? ''], $format));

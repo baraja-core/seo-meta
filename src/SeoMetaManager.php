@@ -17,7 +17,6 @@ use Nette\Http\UrlScript;
 
 final class SeoMetaManager implements AfterMatchEvent
 {
-
 	/** @var Localization */
 	private $localization;
 
@@ -44,7 +43,7 @@ final class SeoMetaManager implements AfterMatchEvent
 		Localization $localization,
 		IStorage $storage,
 		SmartRouter $smartRouter,
-		LinkGenerator $linkGenerator
+		LinkGenerator $linkGenerator,
 	) {
 		$this->localization = $localization;
 		$this->cache = new Cache($storage, 'baraja-seo-meta-manager');
