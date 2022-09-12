@@ -26,11 +26,11 @@ final class SeoMetaExtension extends CompilerExtension
 	{
 		$builder = $this->getContainerBuilder();
 
-		/** @var ServiceDefinition $smartRouter */
 		$smartRouter = $builder->getDefinitionByType(SmartRouter::class);
+		assert($smartRouter instanceof ServiceDefinition);
 
-		/** @var ServiceDefinition $seoMetaManager */
 		$seoMetaManager = $builder->getDefinitionByType(SeoMetaManager::class);
+		assert($seoMetaManager instanceof ServiceDefinition);
 
 		$class->getMethod('initialize')->addBody(
 			'// seo meta.' . "\n"

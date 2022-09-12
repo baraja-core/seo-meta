@@ -12,43 +12,28 @@ use Baraja\SmartRouter\SmartRouter;
 use Nette\Application\LinkGenerator;
 use Nette\Application\UI\InvalidLinkException;
 use Nette\Caching\Cache;
-use Nette\Caching\IStorage;
+use Nette\Caching\Storage;
 use Nette\Http\UrlScript;
 
 final class SeoMetaManager implements AfterMatchEvent
 {
-	/** @var Localization */
-	private $localization;
+	private Cache $cache;
 
-	/** @var Cache */
-	private $cache;
+	private ?OgImageResolver $ogImageResolver = null;
 
-	/** @var SmartRouter */
-	private $smartRouter;
-
-	/** @var LinkGenerator */
-	private $linkGenerator;
-
-	/** @var OgImageResolver|null */
-	private $ogImageResolver;
-
-	/** @var UrlScript|null */
-	private $url;
+	private ?UrlScript $url = null;
 
 	/** @var mixed[]|null */
-	private $match;
+	private ?array $match = null;
 
 
 	public function __construct(
-		Localization $localization,
-		IStorage $storage,
-		SmartRouter $smartRouter,
-		LinkGenerator $linkGenerator,
+		Storage $storage,
+		private Localization $localization,
+		private SmartRouter $smartRouter,
+		private LinkGenerator $linkGenerator,
 	) {
-		$this->localization = $localization;
 		$this->cache = new Cache($storage, 'baraja-seo-meta-manager');
-		$this->smartRouter = $smartRouter;
-		$this->linkGenerator = $linkGenerator;
 	}
 
 
@@ -85,7 +70,9 @@ final class SeoMetaManager implements AfterMatchEvent
 		if ($this->url === null || $this->match === null) {
 			throw new \RuntimeException('Can not compile HTML meta tags, because SeoMetaManager has not been registered to SmartRouter or router does not match this request.');
 		}
-		if (($cache = $this->cache->load($cacheKey = $this->url->getPathInfo() . "\x00" . $this->getLocale())) !== null) {
+		$cacheKey = $this->url->getPathInfo() . "\x00" . $this->getLocale();
+		$cache = $this->cache->load($cacheKey);
+		if ($cache !== null) {
 			return $cache;
 		}
 
@@ -95,18 +82,22 @@ final class SeoMetaManager implements AfterMatchEvent
 		}
 
 		$tags = [];
-		if (($metaTitle = $this->getTitle()) !== null) {
+		$metaTitle = $this->getTitle();
+		if ($metaTitle !== null) {
 			$tags[] = '<title>' . Helpers::escapeHtml($metaTitle) . '</title>';
 		} else {
 			trigger_error('Possible bug: Meta title for page "/' . $this->url->getPathInfo() . '" is not available.');
 		}
-		if (($metaDescription = $meta->getMetaDescription()) !== null) {
+		$metaDescription = $meta->getMetaDescription();
+		if ($metaDescription !== null) {
 			$tags[] = '<meta name="description" content="' . Helpers::escapeHtmlAttr($metaDescription) . '">';
 		}
-		if (($ogTitle = $meta->getOgTitle()) !== null) {
+		$ogTitle = $meta->getOgTitle();
+		if ($ogTitle !== null) {
 			$tags[] = '<meta property="og:title" content="' . Helpers::escapeHtmlAttr($ogTitle) . '">';
 		}
-		if (($ogDescription = $meta->getOgDescription()) !== null) {
+		$ogDescription = $meta->getOgDescription();
+		if ($ogDescription !== null) {
 			$tags[] = '<meta property="og:description" content="' . Helpers::escapeHtmlAttr($ogDescription) . '">';
 		}
 
@@ -130,15 +121,15 @@ final class SeoMetaManager implements AfterMatchEvent
 					'locale' => $availableLocale,
 				]));
 				$tags[] = '<link rel="alternate" href="' . Helpers::escapeHtmlAttr($alternateUrl) . '" hreflang="' . Helpers::escapeHtmlAttr($availableLocale) . '">';
-			} catch (InvalidLinkException $e) {
+			} catch (InvalidLinkException) {
 			}
 		}
 
-		if (
-			$this->ogImageResolver !== null
-			&& ($ogImageUrl = $this->ogImageResolver->getUrl($alternateRoute, $alternateParams)) !== null
-		) {
-			$tags[] = '<meta property="og:image" content="' . Helpers::escapeHtmlAttr($ogImageUrl) . '">';
+		if ($this->ogImageResolver !== null) {
+			$ogImageUrl = $this->ogImageResolver->getUrl($alternateRoute, $alternateParams);
+			if ($ogImageUrl !== null) {
+				$tags[] = '<meta property="og:image" content="' . Helpers::escapeHtmlAttr($ogImageUrl) . '">';
+			}
 		}
 
 		if ($tags !== []) {
@@ -169,10 +160,7 @@ final class SeoMetaManager implements AfterMatchEvent
 			return Helpers::formatTitle($format, $title, $separator, $suffix);
 		}
 		if (
-			(
-				$this->match['presenter'] === 'Homepage'
-				|| $this->match['presenter'] === 'Front:Homepage'
-			)
+			($this->match['presenter'] === 'Homepage' || $this->match['presenter'] === 'Front:Homepage')
 			&& $this->match['action'] === 'default'
 		) {
 			return $this->localization->getStatus()->getLocaleToSiteName()[$locale] ?? null;
